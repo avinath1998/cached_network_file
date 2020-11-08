@@ -1,10 +1,10 @@
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:rxdart/subjects.dart';
 
-import 'cached_file_state.dart';
+import 'cached_network_file_state.dart';
 
-class CachedFileBloc {
-  CachedFileBloc(this.manager, this.url) {
+class CachedNetworkFileBloc {
+  CachedNetworkFileBloc(this.manager, this.url) {
     loadFileFromCache();
   }
 

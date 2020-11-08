@@ -2,10 +2,10 @@ import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import '../cached_network_file.dart';
-import 'cached_file_state.dart';
+import 'cached_network_file_state.dart';
 
-class CachedFile extends StatefulWidget {
-  const CachedFile({
+class CachedNetworkFile extends StatefulWidget {
+  const CachedNetworkFile({
     Key key,
     @required this.url,
     this.cacheManager,
@@ -25,16 +25,16 @@ class CachedFile extends StatefulWidget {
       fileCachedBuilder;
 
   @override
-  _CachedFileState createState() => _CachedFileState();
+  _CachedNetworkFileState createState() => _CachedNetworkFileState();
 }
 
-class _CachedFileState extends State<CachedFile> {
-  CachedFileBloc _cachedFileBloc;
+class _CachedNetworkFileState extends State<CachedNetworkFile> {
+  CachedNetworkFileBloc _cachedFileBloc;
 
   @override
   void initState() {
     super.initState();
-    _cachedFileBloc = CachedFileBloc(
+    _cachedFileBloc = CachedNetworkFileBloc(
         widget.cacheManager ?? DefaultCacheManager(), widget.url);
   }
 
