@@ -4,9 +4,7 @@ import 'package:rxdart/subjects.dart';
 import 'cached_network_file_state.dart';
 
 class CachedNetworkFileBloc {
-  CachedNetworkFileBloc(this.manager, this.url) {
-    loadFileFromCache();
-  }
+  CachedNetworkFileBloc(this.manager, this.url);
 
   final CacheManager manager;
   final String url;
@@ -33,10 +31,10 @@ class CachedNetworkFileBloc {
     }
   }
 
-  Future<void> clearCache() async {
+  Future<void> deleteFileFromCache(String url) async {
     cachedFile.add(const LoadingCachedFileState());
     try {
-      await manager.emptyCache();
+      await manager.removeFile(url);
       cachedFile.add(const LoadedCachedFileState(null));
     } on Exception catch (e) {
       cachedFile.addError(ErrorCachedFileState(e));

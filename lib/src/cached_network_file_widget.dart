@@ -21,7 +21,8 @@ class CachedNetworkFile extends StatefulWidget {
   final Widget placeholder;
   final Widget Function(BuildContext, Function() loadFileCallback)
       fileNotCachedBuilder;
-  final Widget Function(BuildContext, File, Function() deleteFromCacheCallback)
+  final Widget Function(
+          BuildContext, File, Function(String) deleteFromCacheCallback)
       fileCachedBuilder;
 
   @override
@@ -35,7 +36,8 @@ class _CachedNetworkFileState extends State<CachedNetworkFile> {
   void initState() {
     super.initState();
     _cachedFileBloc = CachedNetworkFileBloc(
-        widget.cacheManager ?? DefaultCacheManager(), widget.url);
+        widget.cacheManager ?? DefaultCacheManager(), widget.url)
+      ..loadFileFromCache();
   }
 
   @override
@@ -57,7 +59,7 @@ class _CachedNetworkFileState extends State<CachedNetworkFile> {
                 return widget.fileCachedBuilder(
                     context,
                     (snapshot.data as LoadedCachedFileState).file,
-                    _cachedFileBloc.clearCache);
+                    _cachedFileBloc.deleteFileFromCache);
               } else {
                 return widget.fileNotCachedBuilder(
                     context, _cachedFileBloc.downloadAndStore);
