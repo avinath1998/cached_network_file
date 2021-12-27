@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
@@ -5,15 +6,16 @@ import '../cached_network_file.dart';
 import 'cached_network_file_state.dart';
 
 class CachedNetworkFile extends StatefulWidget {
-  const CachedNetworkFile({
-    Key key,
-    @required this.url,
-    this.cacheManager,
-    @required this.errorWidget,
-    @required this.placeholder,
-    @required this.fileNotCachedBuilder,
-    @required this.fileCachedBuilder,
-  }) : super(key: key);
+  const CachedNetworkFile(
+      {Key key,
+      @required this.url,
+      this.cacheManager,
+      @required this.errorWidget,
+      @required this.placeholder,
+      @required this.fileNotCachedBuilder,
+      @required this.fileCachedBuilder,
+      this.onFileDownloaded})
+      : super(key: key);
 
   final String url;
   final CacheManager cacheManager;
@@ -24,6 +26,7 @@ class CachedNetworkFile extends StatefulWidget {
   final Widget Function(
           BuildContext, File, Function(String) deleteFromCacheCallback)
       fileCachedBuilder;
+  final ValueChanged<File> onFileDownloaded;
 
   @override
   _CachedNetworkFileState createState() => _CachedNetworkFileState();
@@ -31,18 +34,29 @@ class CachedNetworkFile extends StatefulWidget {
 
 class _CachedNetworkFileState extends State<CachedNetworkFile> {
   CachedNetworkFileBloc _cachedFileBloc;
+  StreamSubscription<CachedFileState> _currentStateSubscription;
 
   @override
   void initState() {
     super.initState();
+
     _cachedFileBloc = CachedNetworkFileBloc(
         widget.cacheManager ?? DefaultCacheManager(), widget.url)
       ..loadFileFromCache();
+    _currentStateSubscription =
+        _cachedFileBloc.cachedFile.stream.listen((state) {
+      if (state is LoadedCachedFileState && state.file != null) {
+        if (widget.onFileDownloaded != null) {
+          widget.onFileDownloaded(state.file);
+        }
+      }
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
+    _currentStateSubscription.cancel();
     _cachedFileBloc.cachedFile.close();
   }
 
