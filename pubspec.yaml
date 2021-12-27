@@ -1,7 +1,6 @@
 name: cached_network_file
 description: A new Flutter package project.
 version: 0.0.1
-author:
 homepage:
 
 environment:
@@ -15,7 +14,6 @@ dependencies:
   rxdart: ^0.27.0
   mockito: ^5.0.8
   equatable: ^2.0.2
-
 
 dev_dependencies:
   flutter_test:
