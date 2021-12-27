@@ -51,6 +51,7 @@ class _CachedNetworkFileState extends State<CachedNetworkFile> {
   @override
   void dispose() {
     super.dispose();
+    _cachedFileBloc.clearListeners();
     _cachedFileBloc.cachedFile.close();
   }
 
