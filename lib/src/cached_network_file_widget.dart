@@ -34,7 +34,6 @@ class CachedNetworkFile extends StatefulWidget {
 
 class _CachedNetworkFileState extends State<CachedNetworkFile> {
   CachedNetworkFileBloc _cachedFileBloc;
-  StreamSubscription<CachedFileState> _currentStateSubscription;
 
   @override
   void initState() {
@@ -43,12 +42,9 @@ class _CachedNetworkFileState extends State<CachedNetworkFile> {
     _cachedFileBloc = CachedNetworkFileBloc(
         widget.cacheManager ?? DefaultCacheManager(), widget.url)
       ..loadFileFromCache();
-    _currentStateSubscription =
-        _cachedFileBloc.cachedFile.stream.listen((state) {
-      if (state is LoadedCachedFileState && state.file != null) {
-        if (widget.onFileDownloaded != null) {
-          widget.onFileDownloaded(state.file);
-        }
+    _cachedFileBloc.addFileDownloadedListener((value) {
+      if (widget.onFileDownloaded != null) {
+        widget.onFileDownloaded(value);
       }
     });
   }
@@ -56,7 +52,6 @@ class _CachedNetworkFileState extends State<CachedNetworkFile> {
   @override
   void dispose() {
     super.dispose();
-    _currentStateSubscription.cancel();
     _cachedFileBloc.cachedFile.close();
   }
 

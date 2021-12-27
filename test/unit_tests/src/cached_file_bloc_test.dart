@@ -11,6 +11,18 @@ class MockFile extends Mock implements LocalFile {}
 
 class MockFileInfo extends Mock implements FileInfo {}
 
+class MockCallback {
+  int _callCounter = 0;
+  void call() {
+    _callCounter += 1;
+  }
+
+  bool called(int expected) => _callCounter == expected;
+  void reset() {
+    _callCounter = 0;
+  }
+}
+
 void main() {
   group("CachedFileBloc Tests", () {
     final mockCacheManager = MockCacheManager();
@@ -18,6 +30,18 @@ void main() {
     final mockFileInfo = MockFileInfo();
 
     group("Normal Behaviour", () {
+      test("calls listeenr after downloading and storing file", () async {
+        when(mockCacheManager.getSingleFile(any))
+            .thenAnswer((realInvocation) async => mockFile);
+        final cachedNetworkFileBloc =
+            CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
+        final callback = MockCallback();
+        cachedNetworkFileBloc.addFileDownloadedListener((value) {
+          callback.call();
+        });
+        await cachedNetworkFileBloc.downloadAndStore();
+        expect(callback.called(1), true);
+      });
       test(
           "emits a state of LoadedCachedFileState after downloading and storing file",
           () async {

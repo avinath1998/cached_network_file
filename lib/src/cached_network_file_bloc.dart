@@ -1,3 +1,6 @@
+import 'dart:io';
+
+import 'package:flutter/material.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:rxdart/subjects.dart';
 
@@ -10,12 +13,24 @@ class CachedNetworkFileBloc {
   final String url;
   final BehaviorSubject<CachedFileState> cachedFile =
       BehaviorSubject<CachedFileState>();
+  final List<ValueChanged<File>> _listeners = [];
+
+  void addFileDownloadedListener(ValueChanged<File> callback) {
+    _listeners.add(callback);
+  }
+
+  void clearListeners() {
+    _listeners.clear();
+  }
 
   Future<void> downloadAndStore() async {
     cachedFile.add(const LoadingCachedFileState());
     try {
       final file = await manager.getSingleFile(url);
       cachedFile.add(LoadedCachedFileState(file));
+      for (final listener in _listeners) {
+        listener(file);
+      }
     } on Exception catch (e) {
       cachedFile.addError(ErrorCachedFileState(e));
     }
