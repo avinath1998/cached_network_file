@@ -1,45 +1,46 @@
+import 'dart:io';
+import 'package:file/file.dart';
 import 'package:cached_network_file/cached_network_file.dart';
 import 'package:cached_network_file/src/cached_network_file_state.dart';
 import 'package:file/src/backends/local/local_file.dart';
 import 'package:flutter_cache_manager/flutter_cache_manager.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:mockito/annotations.dart';
 import 'package:mockito/mockito.dart';
 
-class MockCacheManager extends Mock implements CacheManager {}
+import 'cached_file_bloc_test.mocks.dart';
 
-class MockFile extends Mock implements LocalFile {}
-
-class MockFileInfo extends Mock implements FileInfo {}
-
+@GenerateMocks([File, FileInfo, CacheManager])
 void main() {
-  group("CachedFileBloc Tests", () {
-    final mockCacheManager = MockCacheManager();
-    final mockFile = MockFile();
-    final mockFileInfo = MockFileInfo();
+  final mockFile = MockFile();
+  final mockFileInfo = MockFileInfo();
+  final mockCacheManager = MockCacheManager();
 
+  group("CachedFileBloc Tests", () {
     group("Normal Behaviour", () {
       test(
           "emits a state of LoadedCachedFileState after downloading and storing file",
           () async {
-        when(mockCacheManager.getSingleFile(any))
+        when(mockCacheManager.getSingleFile("www.dummyurl.com"))
             .thenAnswer((realInvocation) async => mockFile);
         final cachedNetworkFileBloc =
             CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
         await cachedNetworkFileBloc.downloadAndStore();
         expect(cachedNetworkFileBloc.cachedFile,
-            emits(LoadedCachedFileState(mockFile)));
+            emits(LoadedCachedFileState(file: mockFile)));
       });
 
       test(
           "emits a state of LoadedCachedFileState after loading file from cache",
           () async {
-        when(mockCacheManager.getFileFromCache(any))
+        when(mockCacheManager.getFileFromCache("www.dummyurl.com"))
             .thenAnswer((realInvocation) async => mockFileInfo);
+        when(mockFileInfo.file).thenAnswer((realInvocation) => mockFile);
         final cachedNetworkFileBloc =
             CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
         await cachedNetworkFileBloc.loadFileFromCache();
         expect(cachedNetworkFileBloc.cachedFile,
-            emits(LoadedCachedFileState(mockFileInfo.file)));
+            emits(LoadedCachedFileState(file: mockFileInfo.file)));
       });
 
       test(
@@ -48,8 +49,8 @@ void main() {
         final cachedNetworkFileBloc =
             CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
         await cachedNetworkFileBloc.deleteFileFromCache("dummyurl");
-        expect(cachedNetworkFileBloc.cachedFile,
-            emits(LoadedCachedFileState(null)));
+        expect(
+            cachedNetworkFileBloc.cachedFile, emits(LoadedCachedFileState()));
       });
     });
 
@@ -57,7 +58,8 @@ void main() {
       test(
           "emits a state of ErrorCachedFileState if an"
           "exception is thrown while downloading and storing file.", () async {
-        when(mockCacheManager.getSingleFile(any)).thenThrow(Exception());
+        when(mockCacheManager.getSingleFile("www.dummyurl.com"))
+            .thenThrow(Exception());
         final cachedNetworkFileBloc =
             CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
         await cachedNetworkFileBloc.downloadAndStore();
@@ -68,7 +70,8 @@ void main() {
       test(
           "emits a state of ErrorCachedFileState if an"
           "exception is thrown loading file from cache.", () async {
-        when(mockCacheManager.getFileFromCache(any)).thenThrow(Exception());
+        when(mockCacheManager.getFileFromCache("www.dummyurl.com"))
+            .thenThrow(Exception());
         final cachedNetworkFileBloc =
             CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
         await cachedNetworkFileBloc.loadFileFromCache();
@@ -79,10 +82,11 @@ void main() {
       test(
           "emits a state of ErrorCachedFileState if an"
           "exception is thrown deleting file from cache.", () async {
-        when(mockCacheManager.removeFile(any)).thenThrow(Exception());
+        when(mockCacheManager.removeFile("www.dummyurl.com"))
+            .thenThrow(Exception());
         final cachedNetworkFileBloc =
             CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
-        await cachedNetworkFileBloc.deleteFileFromCache("");
+        await cachedNetworkFileBloc.deleteFileFromCache("www.dummyurl.com");
         expect(cachedNetworkFileBloc.cachedFile,
             emitsError(isInstanceOf<ErrorCachedFileState>()));
       });

@@ -7,11 +7,17 @@ abstract class CachedFileState with EquatableMixin {
 }
 
 class LoadedCachedFileState extends CachedFileState {
-  const LoadedCachedFileState(this.file);
-  final File file;
+  const LoadedCachedFileState({this.file});
+  final File? file;
 
   @override
-  List<Object> get props => [file];
+  List<Object> get props {
+    if (file != null) {
+      return [file!];
+    } else {
+      return [];
+    }
+  }
 }
 
 class ErrorCachedFileState extends CachedFileState {

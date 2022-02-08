@@ -15,7 +15,7 @@ class CachedNetworkFileBloc {
     cachedFile.add(const LoadingCachedFileState());
     try {
       final file = await manager.getSingleFile(url);
-      cachedFile.add(LoadedCachedFileState(file));
+      cachedFile.add(LoadedCachedFileState(file: file));
     } on Exception catch (e) {
       cachedFile.addError(ErrorCachedFileState(e));
     }
@@ -25,7 +25,7 @@ class CachedNetworkFileBloc {
     cachedFile.add(const LoadingCachedFileState());
     try {
       final fileInfo = await manager.getFileFromCache(url);
-      cachedFile.add(LoadedCachedFileState(fileInfo?.file));
+      cachedFile.add(LoadedCachedFileState(file: fileInfo?.file));
     } on Exception catch (e) {
       cachedFile.addError(ErrorCachedFileState(e));
     }
@@ -35,7 +35,7 @@ class CachedNetworkFileBloc {
     cachedFile.add(const LoadingCachedFileState());
     try {
       await manager.removeFile(url);
-      cachedFile.add(const LoadedCachedFileState(null));
+      cachedFile.add(const LoadedCachedFileState());
     } on Exception catch (e) {
       cachedFile.addError(ErrorCachedFileState(e));
     }

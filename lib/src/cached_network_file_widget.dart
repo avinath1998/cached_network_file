@@ -6,17 +6,17 @@ import 'cached_network_file_state.dart';
 
 class CachedNetworkFile extends StatefulWidget {
   const CachedNetworkFile({
-    Key key,
-    @required this.url,
+    Key? key,
+    required this.url,
     this.cacheManager,
-    @required this.errorWidget,
-    @required this.placeholder,
-    @required this.fileNotCachedBuilder,
-    @required this.fileCachedBuilder,
+    required this.errorWidget,
+    required this.placeholder,
+    required this.fileNotCachedBuilder,
+    required this.fileCachedBuilder,
   }) : super(key: key);
 
   final String url;
-  final CacheManager cacheManager;
+  final CacheManager? cacheManager;
   final Widget Function(BuildContext, Exception) errorWidget;
   final Widget placeholder;
   final Widget Function(BuildContext, Function() loadFileCallback)
@@ -30,7 +30,7 @@ class CachedNetworkFile extends StatefulWidget {
 }
 
 class _CachedNetworkFileState extends State<CachedNetworkFile> {
-  CachedNetworkFileBloc _cachedFileBloc;
+  late final CachedNetworkFileBloc _cachedFileBloc;
 
   @override
   void initState() {
@@ -58,7 +58,7 @@ class _CachedNetworkFileState extends State<CachedNetworkFile> {
               if ((snapshot.data as LoadedCachedFileState).file != null) {
                 return widget.fileCachedBuilder(
                     context,
-                    (snapshot.data as LoadedCachedFileState).file,
+                    (snapshot.data as LoadedCachedFileState).file!,
                     _cachedFileBloc.deleteFileFromCache);
               } else {
                 return widget.fileNotCachedBuilder(
