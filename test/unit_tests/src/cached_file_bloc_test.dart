@@ -10,6 +10,18 @@ import 'package:mockito/mockito.dart';
 
 import 'cached_file_bloc_test.mocks.dart';
 
+class MockCallback {
+  int _callCounter = 0;
+  void call() {
+    _callCounter += 1;
+  }
+
+  bool called(int expected) => _callCounter == expected;
+  void reset() {
+    _callCounter = 0;
+  }
+}
+
 @GenerateMocks([File, FileInfo, CacheManager])
 void main() {
   final mockFile = MockFile();
@@ -18,6 +30,18 @@ void main() {
 
   group("CachedFileBloc Tests", () {
     group("Normal Behaviour", () {
+      test("calls listeenr after downloading and storing file", () async {
+        when(mockCacheManager.getSingleFile(any))
+            .thenAnswer((realInvocation) async => mockFile);
+        final cachedNetworkFileBloc =
+            CachedNetworkFileBloc(mockCacheManager, "www.dummyurl.com");
+        final callback = MockCallback();
+        cachedNetworkFileBloc.addFileDownloadedListener((value) {
+          callback.call();
+        });
+        await cachedNetworkFileBloc.downloadAndStore();
+        expect(callback.called(1), true);
+      });
       test(
           "emits a state of LoadedCachedFileState after downloading and storing file",
           () async {

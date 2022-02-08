@@ -5,15 +5,16 @@ import '../cached_network_file.dart';
 import 'cached_network_file_state.dart';
 
 class CachedNetworkFile extends StatefulWidget {
-  const CachedNetworkFile({
-    Key? key,
-    required this.url,
-    this.cacheManager,
-    required this.errorWidget,
-    required this.placeholder,
-    required this.fileNotCachedBuilder,
-    required this.fileCachedBuilder,
-  }) : super(key: key);
+  const CachedNetworkFile(
+      {Key? key,
+      required this.url,
+      this.cacheManager,
+      required this.errorWidget,
+      required this.placeholder,
+      required this.fileNotCachedBuilder,
+      required this.fileCachedBuilder,
+      this.onFileDownloaded})
+      : super(key: key);
 
   final String url;
   final CacheManager? cacheManager;
@@ -24,6 +25,7 @@ class CachedNetworkFile extends StatefulWidget {
   final Widget Function(
           BuildContext, File, Function(String) deleteFromCacheCallback)
       fileCachedBuilder;
+  final ValueChanged<File>? onFileDownloaded;
 
   @override
   _CachedNetworkFileState createState() => _CachedNetworkFileState();
@@ -35,14 +37,21 @@ class _CachedNetworkFileState extends State<CachedNetworkFile> {
   @override
   void initState() {
     super.initState();
+
     _cachedFileBloc = CachedNetworkFileBloc(
         widget.cacheManager ?? DefaultCacheManager(), widget.url)
       ..loadFileFromCache();
+    _cachedFileBloc.addFileDownloadedListener((value) {
+      if (widget.onFileDownloaded != null) {
+        widget.onFileDownloaded!(value);
+      }
+    });
   }
 
   @override
   void dispose() {
     super.dispose();
+    _cachedFileBloc.clearListeners();
     _cachedFileBloc.cachedFile.close();
   }
 
